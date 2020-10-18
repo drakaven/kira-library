@@ -1,14 +1,26 @@
-from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 
+from .models import Book, Reservation
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+
+class BookSerializer(serializers.ModelSerializer):
+
     class Meta:
-        model = User
-        fields = ['url', 'username', 'email', 'groups']
+        model = Book
+        fields = [
+            'id',
+            'url',
+            'title',
+            'author',
+            'quantity',
+            'quantity_available',
+            'reservations',
+        ]
 
 
-class GroupSerializer(serializers.HyperlinkedModelSerializer):
+class ReservationSerializer(serializers.ModelSerializer):
+    book = serializers.PrimaryKeyRelatedField(queryset=Book.objects.all())
+
     class Meta:
-        model = Group
-        fields = ['url', 'name']
+        model = Reservation
+        fields = ['id', 'book']

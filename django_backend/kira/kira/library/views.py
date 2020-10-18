@@ -1,22 +1,26 @@
-from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
-from rest_framework import permissions
-from .serializers import UserSerializer, GroupSerializer
+import django_filters
+from rest_framework import viewsets, filters
+from .serializers import BookSerializer, ReservationSerializer
+from .models import Book, Reservation
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class BookViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows users to be viewed or edited.
+    Viewset to handle search, filtering, order and pagination.
+    For time sake no User is attached to a reservation so the filter merely
+    returns if the book has any reservations at all.
     """
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+
+    queryset = Book.objects.all().distinct().order_by('title')
+    filter_backends = [
+        django_filters.rest_framework.DjangoFilterBackend,
+        filters.SearchFilter,
+    ]
+    filter_fields = {'reservations': ['isnull']}
+    search_fields = ['title']
+    serializer_class = BookSerializer
 
 
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAuthenticated]
+class ReservationViewSet(viewsets.ModelViewSet):
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer
